@@ -29,8 +29,8 @@ sg.theme('SystemDefault')
 
 
 try:
-    fg = FlightGear('localhost', 5401)
-    # fg = FlightGear('192.168.42.9', 5401)
+    # fg = FlightGear('localhost', 5401)
+    fg = FlightGear('192.168.42.7', 5401)
 except ConnectionRefusedError:
     sg.popup_error('Opps', 'Looks like you started PiStack before FlightGear'
     ' or did not configure FlightGear - PiStack will exit.', font=(any, 14))
@@ -38,11 +38,8 @@ except ConnectionRefusedError:
 
 
 # Value, (double)
-ver_sp = fg['/instrumentation/vertical-speed-indicator/indicated-speed-fpm']
-roll_deg = fg['/instrumentation/attitude-indicator/indicated-roll-deg']
-
-
-
+# roll_deg = fg['/instrumentation/attitude-indicator/indicated-roll-deg']
+# variometer = fg['/instrumentation/vertical-speed-indicator/indicated-speed-fpm']
 
 
 reply = sg.popup_ok_cancel('Do you wish to continue?', font=(any, 14))
@@ -52,30 +49,50 @@ if reply == 'Cancel':
     sys.exit()
 
 
-TINK.setMODE(0,8,'servo')   #Set channel 8 to servo control
-time.sleep(1.0)             #Give servo time to settle
-TINK.setSERVO(0,8,45.0)      #Move servo to 0 degrees
-time.sleep(1.0)             #Give servo time to move
+# Bank (roll_deg), channel 8, servo control, settle time
+TINK.setMODE(0,8,'servo')
+time.sleep(1.0)
+#TINK.setSERVO(0,8,45.0)      #Move servo to 0 degrees
+#time.sleep(1.0)             #Give servo time to move
+
+# Variometer, channel 7, servo control, settle time
+TINK.setMODE(0,1,'servo')
+time.sleep(1.0)
 
 
 #loop forever
 while(True):
+    # Horizon, 1/2
     roll_deg = fg['/instrumentation/attitude-indicator/indicated-roll-deg']
     print(roll_deg)
     
     # Reverse and calibrate, FG is 45 0 -45, PiPlate is 0 180deg
-    if roll_deg >= 0.0:
-        roll_deg_cal = 90.0 - roll_deg
-    if roll_deg < 0.0:
-        roll_deg_cal = abs(roll_deg + -90.0)
-    
-#    roll_deg_cal = roll_deg + 45.0
+    #if roll_deg >= 0.0:
+    roll_deg_cal = 90.0 - roll_deg
+    #if roll_deg < 0.0:
+    #    roll_deg_cal = abs(roll_deg + -90.0)
     
     # Travel snubber
     if roll_deg_cal > 180:
         roll_deg_cal = 180
     if roll_deg_cal < 0:
-        roll_deg = 0
+        roll_deg_cal = 0
 
     TINK.setSERVO(0,8,roll_deg_cal)
+    time.sleep(0.2)
+
+
+    # Variometer, climb rate
+    variometer = fg['/instrumentation/vertical-speed-indicator/indicated-speed-fpm']
+    print(variometer)
+    
+    variometer_deg_cal = 90 + (variometer * 0.045)
+
+        # Travel snubber
+    if variometer_deg_cal > 180:
+        variometer_deg_cal = 180
+    if variometer_deg_cal < 0:
+        variometer_deg_cal = 0
+
+    TINK.setSERVO(0,1,variometer_deg_cal)
     time.sleep(0.2)
