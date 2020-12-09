@@ -50,8 +50,12 @@ def int_apionics():
 def run_apionics():
     #loop forever
     while active:
-        # Horizon, 1/2
+        # Read Variables
         roll_deg = fg['/instrumentation/attitude-indicator/indicated-roll-deg']
+        variometer = fg['/instrumentation/vertical-speed-indicator/indicated-speed-fpm']
+        fuel_gauge = fg['/consumables/fuel/tank/level-gal_us']
+        
+        # Horizon, 1/2
         # Reverse and calibrate, FG is 45 0 -45, PiPlate is 0 180deg
         roll_deg_cal = 90.0 - roll_deg
         # Travel snubber
@@ -63,7 +67,6 @@ def run_apionics():
 
 
         # Variometer, climb rate
-        variometer = fg['/instrumentation/vertical-speed-indicator/indicated-speed-fpm']
         variometer_deg_cal = 90 + (variometer * 0.045)
         # Travel snubber
         if variometer_deg_cal > 180:
@@ -73,7 +76,6 @@ def run_apionics():
         TINK.setSERVO(0,1,variometer_deg_cal)
 
         # Fuel gauge
-        fuel_gauge = fg['/consumables/fuel/tank/level-gal_us']
         fuel_gauge_deg_cal = fuel_gauge * 0.9
         # Travel snubber
         if fuel_gauge_deg_cal > 180:
@@ -87,7 +89,7 @@ def run_apionics():
 # Core
 #-------------------
 
-print("Welcome to apionics")
+print("Welcome to aPionics")
 time.sleep(3.0)
 
 print("Tring to connect to FlightGear")
