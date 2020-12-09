@@ -48,13 +48,7 @@ def int_apionics():
 
 
 def run_apionics():
-    #loop forever
-    while active:
-        # Read Variables
-        roll_deg = fg['/instrumentation/attitude-indicator/indicated-roll-deg']
-        variometer = fg['/instrumentation/vertical-speed-indicator/indicated-speed-fpm']
-        fuel_gauge = fg['/consumables/fuel/tank/level-gal_us']
-        
+     
         # Horizon, 1/2
         # Reverse and calibrate, FG is 45 0 -45, PiPlate is 0 180deg
         roll_deg_cal = 90.0 - roll_deg
@@ -112,4 +106,10 @@ print("Initialized")
 time.sleep(1.0)
 
 print("Linking your instrumentation")
-run_apionics()
+while active:
+    # Read Variables
+    roll_deg = fg['/instrumentation/attitude-indicator/indicated-roll-deg']
+    variometer = fg['/instrumentation/vertical-speed-indicator/indicated-speed-fpm']
+    fuel_gauge = fg['/consumables/fuel/tank/level-gal_us']
+    
+    run_apionics()
