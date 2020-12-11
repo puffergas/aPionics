@@ -56,61 +56,63 @@ def snubber(deg_cal):
     return deg_cal
 
 
-def run_apionics():     
+def run_apionics(roll_deg, variometer, fuel_gauge):     
     """ Forever loop that runs aPionics. """
     # 1/2 of an artificial horizon
     # Reverse and calibrate, FG is 45 0 -45, PiPlate is 0 180deg
     roll_deg_cal = 90.0 - roll_deg
     # Travel snubber
     roll_deg_cal = snubber(roll_deg_cal)
-    TINK.setSERVO(0,8,roll_deg_cal)
+    TINK.setSERVO(0,8,int(roll_deg_cal))
 
 
     # Variometer, climb rate
-    variometer_deg_cal = 90 + (variometer * 0.045)
+    variometer_deg_cal = 90.0 + (variometer * 0.0225)
     # Travel snubber
     variometer_deg_cal = snubber(variometer_deg_cal)
-    TINK.setSERVO(0,1,variometer_deg_cal)
+    TINK.setSERVO(0,1,int(variometer_deg_cal))
 
     # Fuel gauge
     fuel_gauge_deg_cal = fuel_gauge * 0.9
     # Travel snubber
     fuel_gauge_deg_cal = snubber(fuel_gauge_deg_cal)
-    TINK.setSERVO(0,2,fuel_gauge_deg_cal)
+    TINK.setSERVO(0,2,int(fuel_gauge_deg_cal))
 
 
-#-------------------
-# Core
-#-------------------
+def main():
+    """ This is the core of aPionics. """
+    print("\nWelcome to aPionics")
+    time.sleep(3.0)
 
-print("\nWelcome to aPionics")
-time.sleep(3.0)
+    print("Tring to connect to FlightGear")
+    time.sleep(2.0)
 
-print("Tring to connect to FlightGear")
-time.sleep(2.0)
+    try:
+        # fg = FlightGear('localhost', 5401)
+        fg = FlightGear('192.168.42.7', 5401)
+    except ConnectionRefusedError:
+        print("Telnet Error; aPionics could not connect to FlightGear.")
+        time.sleep(4.0)
+        sys.exit()
 
-try:
-    # fg = FlightGear('localhost', 5401)
-    fg = FlightGear('192.168.42.7', 5401)
-except ConnectionRefusedError:
-    print("Telnet Error; aPionics could not connect to FlightGear.")
-    time.sleep(4.0)
-    sys.exit()
+    print("aPionics has connected to FlightGear")
+    time.sleep(2.0)
 
-print("aPionics has connected to FlightGear")
-time.sleep(2.0)
+    print("Initializing avionic istrumentation")
+    int_apionics()
+    print("Initialized")
+    time.sleep(1.0)
 
-print("Initializing avionic istrumentation")
-int_apionics()
-print("Initialized")
-time.sleep(1.0)
+    print("Linking your instrumentation")
 
-print("Linking your instrumentation")
+    while active:
+        # Read Variables
+        roll_deg = fg['/instrumentation/attitude-indicator/indicated-roll-deg']
+        variometer = fg['/instrumentation/vertical-speed-indicator/indicated-speed-fpm']
+        fuel_gauge = fg['/consumables/fuel/tank/level-gal_us']
+        
+        run_apionics(roll_deg, variometer, fuel_gauge)
 
-while active:
-    # Read Variables
-    roll_deg = fg['/instrumentation/attitude-indicator/indicated-roll-deg']
-    variometer = fg['/instrumentation/vertical-speed-indicator/indicated-speed-fpm']
-    fuel_gauge = fg['/consumables/fuel/tank/level-gal_us']
-    
-    run_apionics()
+
+if __name__=="__main__":
+    main()
