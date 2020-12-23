@@ -39,13 +39,13 @@ def int_apionics():
     """ Initialize the servos and define channels. """
     # Bank (roll_deg), channel 8, servo control, settle time
     TINK.setMODE(0,8,'servo')
-    time.sleep(1.0)
+    time.sleep(0.5)
     # Variometer, channel 1, servo control, settle time
     TINK.setMODE(0,1,'servo')
-    time.sleep(1.0)
+    time.sleep(0.5)
     # Fuel gauge, channel 2, servo control, settle time
     TINK.setMODE(0,2,'servo')
-    time.sleep(1.0)
+    time.sleep(0.5)
 
 def snubber(deg_cal):
     """ Servo travel limit, gear saver. """
@@ -63,20 +63,20 @@ def run_apionics(roll_deg, variometer, fuel_gauge):
     roll_deg_cal = 90.0 - roll_deg
     # Travel snubber
     roll_deg_cal = snubber(roll_deg_cal)
-    TINK.setSERVO(0,8,int(roll_deg_cal))
+    TINK.setSERVO(0,8,roll_deg_cal)
 
 
     # Variometer, climb rate
     variometer_deg_cal = 90.0 + (variometer * 0.0225)
     # Travel snubber
     variometer_deg_cal = snubber(variometer_deg_cal)
-    TINK.setSERVO(0,1,int(variometer_deg_cal))
+    TINK.setSERVO(0,1,variometer_deg_cal)
 
     # Fuel gauge
     fuel_gauge_deg_cal = fuel_gauge * 0.9
     # Travel snubber
     fuel_gauge_deg_cal = snubber(fuel_gauge_deg_cal)
-    TINK.setSERVO(0,2,int(fuel_gauge_deg_cal))
+    TINK.setSERVO(0,2,fuel_gauge_deg_cal)
 
 
 def main():
@@ -98,19 +98,21 @@ def main():
     print("aPionics has connected to FlightGear")
     time.sleep(2.0)
 
-    print("Initializing avionic istrumentation")
+    print("Initializing avionic instrumentation")
     int_apionics()
     print("Initialized")
     time.sleep(1.0)
 
     print("Linking your instrumentation")
+    print("Press CTRL + C to exit.")
+
 
     while active:
         # Read Variables
         roll_deg = fg['/instrumentation/attitude-indicator/indicated-roll-deg']
         variometer = fg['/instrumentation/vertical-speed-indicator/indicated-speed-fpm']
         fuel_gauge = fg['/consumables/fuel/tank/level-gal_us']
-        
+
         run_apionics(roll_deg, variometer, fuel_gauge)
 
 
