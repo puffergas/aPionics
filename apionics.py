@@ -26,14 +26,6 @@ import threading
 
 
 #-------------------
-# Variables
-#-------------------
-
-#active = True
-#quit_apionics = ""
-
-
-#-------------------
 # Functions
 #-------------------
 
@@ -141,9 +133,7 @@ def main():
     time.sleep(1.0)
 
     print("Linking your instrumentation")
-    print("Press CTRL + C to exit.")
 
-    deflate_thread = False
     # Create treads
     ignition_art_hor_thread = threading.Thread(target=art_hor_thread, args=(fg_art_hor,), daemon=True)
     ignition_climb_thread = threading.Thread(target=climb_thread, args=(fg_climb,), daemon=True)
