@@ -81,11 +81,22 @@ def slow_gauge(fg_slow):
     """ A place for slow changing instruments. """
     while True:
         # Fuel gauge
-        fuel_gauge = fg_slow['/consumables/fuel/tank/level-gal_us']
+        # Consider tank select switch
+        tank_switch = TINK.getPOT(0,4)
+        if tank_switch <= 5:
+            fuel_gauge = fg_slow['/consumables/fuel/tank[3]/level-gal_us']
+        elif tank_switch > 5 and tank_switch <= 40:
+            fuel_gauge = fg_slow['/consumables/fuel/tank[2]/level-gal_us']
+        elif tank_switch > 40 and tank_switch <= 80:
+            fuel_gauge = fg_slow['/consumables/fuel/tank[1]/level-gal_us']
+        else:
+            fuel_gauge = fg_slow['/consumables/fuel/tank/level-gal_us']
+        # Normalize fuel gauge value
         fuel_gauge_deg_cal = fuel_gauge * 0.9
         # Travel snubber
         fuel_gauge_deg_cal = snubber(fuel_gauge_deg_cal)
         TINK.setSERVO(0,2,fuel_gauge_deg_cal)
+        time.sleep(1.0)
 
 
 #-------------------
@@ -102,7 +113,7 @@ def main():
 
     try:
         # fg_slow = FlightGear('localhost', 5401)
-        fg_slow = FlightGear('192.168.42.7', 5401)
+        fg_slow = FlightGear('192.168.42.22', 5402)
     except ConnectionRefusedError:
         print("Telnet Error; aPionics could not connect to FlightGear.")
         time.sleep(4.0)
@@ -110,7 +121,7 @@ def main():
 
     try:
         # fg_art_hor = FlightGear('localhost', 5401)
-        fg_art_hor = FlightGear('192.168.42.7', 5402)
+        fg_art_hor = FlightGear('192.168.42.22', 5403)
     except ConnectionRefusedError:
         print("Telnet Error; aPionics Artificial Horizon could not connect to FlightGear.")
         time.sleep(4.0)
@@ -118,7 +129,7 @@ def main():
 
     try:
         # fg_climb = FlightGear('localhost', 5401)
-        fg_climb = FlightGear('192.168.42.7', 5403)
+        fg_climb = FlightGear('192.168.42.22', 5404)
     except ConnectionRefusedError:
         print("Telnet Error; aPionics Climb Rate could not connect to FlightGear.")
         time.sleep(4.0)
