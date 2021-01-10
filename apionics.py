@@ -84,13 +84,13 @@ def slow_gauge(fg_slow):
         # Consider tank select switch
         tank_switch = TINK.getPOT(0,4)
         if tank_switch <= 5:
-            fuel_gauge = fg_slow['/consumables/fuel/tank[3]/level-gal_us']
-        elif tank_switch > 5 and tank_switch <= 40:
-            fuel_gauge = fg_slow['/consumables/fuel/tank[2]/level-gal_us']
-        elif tank_switch > 40 and tank_switch <= 80:
-            fuel_gauge = fg_slow['/consumables/fuel/tank[1]/level-gal_us']
-        else:
             fuel_gauge = fg_slow['/consumables/fuel/tank/level-gal_us']
+        elif tank_switch > 5 and tank_switch <= 40:
+            fuel_gauge = fg_slow['/consumables/fuel/tank[1]/level-gal_us']
+        elif tank_switch > 40 and tank_switch <= 80:
+            fuel_gauge = fg_slow['/consumables/fuel/tank[2]/level-gal_us']
+        else:
+            fuel_gauge = fg_slow['/consumables/fuel/tank[3]/level-gal_us']
         # Normalize fuel gauge value
         fuel_gauge_deg_cal = fuel_gauge * 0.9
         # Travel snubber
